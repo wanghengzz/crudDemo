@@ -1,14 +1,14 @@
 package com.example.demo.demos.web.dto;
-import com.example.demo.demos.web.User.User;
+import com.example.demo.demos.web.UserList.UserList;
 
 public  class UserRequestDTO {
-    private User data;
+    private UserList data;
 
-    public User getData() {
+    public UserList getData() {
         return data;
     }
 
-    public void setData(User data) {
+    public void setData(UserList data) {
         this.data = data;
     }
 }

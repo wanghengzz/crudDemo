@@ -6,3 +6,14 @@ spring:
     url: jdbc:mysql://localhost:3306/demo?serverTimezone=GMT%2b8
     username: root
     password: admin
+  redis:
+    host: localhost
+    port: 6379
+    database: 0
+    timeout: 1800000
+    lettuce:
+      pool:
+        max-active: 20  # 最大连接数
+        max-wait: -1    # 最大阻塞等待时间（负值表示没有限制）
+        max-idle: 5     # 最大空闲连接
+        min-idle: 0     # 最小空闲连接  

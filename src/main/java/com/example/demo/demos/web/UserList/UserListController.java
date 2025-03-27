@@ -6,14 +6,14 @@
  * @Description:
  * @FilePath: \demo\src\main\java\com\example\demo\demos\web\User\BasicController.java
  */
-package com.example.demo.demos.web.User;
+package com.example.demo.demos.web.UserList;
 import com.example.demo.demos.web.dto.UserRequestDTO;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.demo.demos.web.User.service.UserService;
+import com.example.demo.demos.web.UserList.service.UserListService;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -44,16 +44,16 @@ import org.springframework.web.multipart.MultipartFile;
     produces = "application/json;charset=UTF-8"
 )
 @CrossOrigin(origins = "*", maxAge = 3600)
-public class BasicController {
+public class UserListController {
 
     @Autowired
-    private UserService userService;
+    private UserListService userService;
 
     // 查询所有用户
     @GetMapping("/query")
     @ResponseBody
     public Result<Map<String, Object>> getAllUsers() {
-        List<User> users = userService.findAll();
+        List<UserList> users = userService.findAll();
         long total = userService.getTotalCount(null,null,null);
         if(users.isEmpty()){
             return Result.warningData("101", "用户数据表为空！");
@@ -79,7 +79,7 @@ public class BasicController {
         String sex = requestDTO.getData() != null ? requestDTO.getData().getSex() : null;
         String profession= requestDTO.getData() != null ? requestDTO.getData().getProfession() : null;
 
-        List<User> users = userService.findAllWithPagination(pageNo, pageSize, sex,profession,name);
+        List<UserList> users = userService.findAllWithPagination(pageNo, pageSize, sex,profession,name);
         long total = userService.getTotalCount(sex,profession,name);
 
         Map<String, Object> response = new HashMap<>();
@@ -94,8 +94,8 @@ public class BasicController {
     // 根据ID查询单个用户
     @GetMapping("/queryOne")
     @ResponseBody
-    public Result<User> getUserByName(@RequestParam Long id) {
-        User user = userService.findById(id);
+    public Result<UserList> getUserByName(@RequestParam Long id) {
+        UserList user = userService.findById(id);
         if (user == null) {
             return Result.warningData("101", "用户不存在");
         }
@@ -105,18 +105,18 @@ public class BasicController {
     // 根据名称、职业搜索用户
     @PostMapping("/search")
     @ResponseBody
-        public Result<List<User>> searchUsersByNameOrProfession(@RequestBody UserRequestDTO requestDTO) {
+        public Result<List<UserList>> searchUsersByNameOrProfession(@RequestBody UserRequestDTO requestDTO) {
         String name = requestDTO.getData().getName();
         String profession = requestDTO.getData().getProfession();
-        List<User> users = userService.findByNameOrProfession(name,profession);
+        List<UserList> users = userService.findByNameOrProfession(name,profession);
         return Result.success(users,null);
     }
 
     // 创建新用户
     @PostMapping("/add")
     @ResponseBody
-    public Result<User> createUser(@RequestBody UserRequestDTO requestDTO) {
-        User user = requestDTO.getData();
+    public Result<UserList> createUser(@RequestBody UserRequestDTO requestDTO) {
+        UserList user = requestDTO.getData();
         // 创建新用户时不需要设置ID，由系统自动生成
         user.setId(null);
         return Result.success(userService.save(user), "新增成功！");
@@ -125,13 +125,13 @@ public class BasicController {
     // 更新用户信息
     @PostMapping("/update")
     @ResponseBody
-    public Result<User> updateUser(@RequestBody UserRequestDTO requestDTO) {
-        User user = requestDTO.getData();
+    public Result<UserList> updateUser(@RequestBody UserRequestDTO requestDTO) {
+        UserList user = requestDTO.getData();
         if (user.getId() == null) {
             return Result.error("400", "用户ID不能为空");
         }
 
-        User existingUser = userService.findById(user.getId().longValue());
+        UserList existingUser = userService.findById(user.getId().longValue());
         if (existingUser == null) {
             return Result.error("404", "用户不存在");
         }
@@ -152,7 +152,7 @@ public class BasicController {
     @ResponseBody
     public ResponseEntity<byte[]> exportUsers() throws IOException {
         //
-        List<User> users = userService.findAll();
+        List<UserList> users = userService.findAll();
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("用户数据");
 
@@ -193,7 +193,7 @@ public class BasicController {
             }
             // 填充数据
             int rowNum = 4;
-            for (User user : users) {
+            for (UserList user : users) {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(user.getId());
                 row.createCell(1).setCellValue(user.getName());
@@ -238,7 +238,7 @@ public class BasicController {
     @ResponseBody
     public Result<List<Integer>> getAllAge() {
         //去掉重复的
-        List<Integer> ages = userService.findAll().stream().map(User::getAge).sorted().distinct().collect(Collectors.toList());
+        List<Integer> ages = userService.findAll().stream().map(UserList::getAge).sorted().distinct().collect(Collectors.toList());
 
         return Result.success(ages,"获取成功！");
     }
@@ -260,7 +260,7 @@ public class BasicController {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                User user = new User();
+                UserList user = new UserList();
                 user.setName(row.getCell(1).getStringCellValue());
                 user.setSex(row.getCell(2).getStringCellValue());
                 user.setAge((int) row.getCell(3).getNumericCellValue());
