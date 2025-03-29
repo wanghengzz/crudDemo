@@ -41,14 +41,13 @@ public class UserServiceImpl implements UserService {
         }
     }
     @Override
-public Boolean logout(User user) {
-    try {
-        String username = jwtUtil.extractUsername(user.getToken());
-        // Delete the token from Redis instead of setting it to null
-        redisTemplate.delete(username);
-        return true;
-    } catch (Exception e) {
-        return false;
+    public Boolean logout(User user) {
+        try {
+            String username = jwtUtil.extractUsername(user.getToken());
+            redisTemplate.delete(username);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
-}
 }

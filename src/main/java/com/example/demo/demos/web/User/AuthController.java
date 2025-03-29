@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public Result<Void> logout(@RequestBody User user) {
+    public Result<Map<String, Object>> logout(@RequestBody User user) {
         Boolean result = userService.logout(user);
         if(result){
             return Result.success(null,"登出成功!");

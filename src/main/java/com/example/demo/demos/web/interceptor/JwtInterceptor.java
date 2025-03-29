@@ -47,18 +47,18 @@ public class JwtInterceptor implements HandlerInterceptor {
             String username = jwtUtil.extractUsername(token);
             String storedToken = redisTemplate.opsForValue().get(username);
             
-            // Check if token exists in Redis
+            // 检查redis 中是否存在该用户
             if (storedToken == null) {
                 writeErrorResponse(response, "401", "Token已失效，请重新登录");
                 return false;
             }
             
-            // Check if the token matches the one stored in Redis
+            // 检查 redis 中的 token 是否与请求中的 token 相同
             if (!token.equals(storedToken)) {
                 writeErrorResponse(response, "401", "Token已失效，请重新登录");
                 return false;
             }
-
+            // 检查 token 是否过期
             if (jwtUtil.isTokenExpired(token)) {
                 writeErrorResponse(response, "401", "Token已过期，请重新登录");
                 return false;
