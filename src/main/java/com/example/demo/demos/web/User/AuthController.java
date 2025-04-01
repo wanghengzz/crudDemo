@@ -2,7 +2,7 @@
  * @Author: 
  * @Date: 2025-03-26 15:56:27
  * @LastEditors: Do not edit
- * @LastEditTime: 2025-03-27 14:56:05
+ * @LastEditTime: 2025-04-01 10:10:24
  * @Description: 
  * @FilePath: \demo\src\main\java\com\example\demo\demos\web\User\AuthController.java
  */
@@ -37,6 +37,19 @@ public class AuthController {
             return Result.success(null,"登出成功!");
         }else{
             return Result.error("400", "登出失败！");
+        }
+    }
+    @PostMapping("/register")
+    public Result<Map<String, Object>> register(@RequestBody User user) {
+        Map<String, Object> data = userService.register(user);
+        if(data != null){
+            // 检查是否是账号已存在的错误
+            if(data.containsKey("error") && "account_exists".equals(data.get("error"))){
+                return Result.error("400", "账号已存在！");
+            }
+            return Result.success(data,"注册成功,请登录账号!");
+        }else{
+            return Result.error("400", "注册失败！");
         }
     }
 }

@@ -7,4 +7,5 @@ import java.util.Map;
 public interface UserService {
     Map<String, Object> login(User user);
     Boolean logout(User user);
+    Map<String, Object> register(User user);
 }

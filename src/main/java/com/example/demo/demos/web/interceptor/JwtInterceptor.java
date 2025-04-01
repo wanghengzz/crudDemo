@@ -30,41 +30,71 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String token = request.getHeader("Authorization");
+        String requestURI = request.getRequestURI();
+        System.out.println("请求路径: " + requestURI);
         
-        if (token == null || token.isEmpty()) {
+        // 更健壮的路径检查
+        if (requestURI.startsWith("/auth/") || 
+            requestURI.equals("/auth") || 
+            requestURI.startsWith("/public/") || 
+            requestURI.equals("/public")) {
+            return true;  // 允许请求继续处理，不验证token
+        }
+        // Token验证逻辑
+        String token = request.getHeader("Authorization");
+        System.out.println("Authorization头: " + token);
+
+        if (token == null || token.trim().isEmpty()) {
+            System.out.println("Token不存在");
             writeErrorResponse(response, "401", "Token不存在，请先登录");
             return false;
         }
-        
+
         if (!token.startsWith("Bearer ")) {
+            System.out.println("Token格式错误");
             writeErrorResponse(response, "401", "Token格式错误");
             return false;
         }
 
-        token = token.substring(7);
+        token = token.substring(7).trim();
+        System.out.println("提取的Token: " + token);
+
         try {
             String username = jwtUtil.extractUsername(token);
+            System.out.println("提取的用户名: " + username);
+
+            if (username == null || username.isEmpty()) {
+                System.out.println("无效的Token");
+                writeErrorResponse(response, "401", "Token无效");
+                return false;
+            }
+
             String storedToken = redisTemplate.opsForValue().get(username);
-            
-            // 检查redis 中是否存在该用户
+            System.out.println("Redis中存储的Token: " + storedToken);
+
             if (storedToken == null) {
+                System.out.println("Redis中没有找到Token");
                 writeErrorResponse(response, "401", "Token已失效，请重新登录");
                 return false;
             }
-            
-            // 检查 redis 中的 token 是否与请求中的 token 相同
+
             if (!token.equals(storedToken)) {
+                System.out.println("Token不匹配");
                 writeErrorResponse(response, "401", "Token已失效，请重新登录");
                 return false;
             }
-            // 检查 token 是否过期
+
             if (jwtUtil.isTokenExpired(token)) {
+                System.out.println("Token已过期");
                 writeErrorResponse(response, "401", "Token已过期，请重新登录");
                 return false;
             }
-            return true;
+
+            return true;  // Token有效，允许请求继续处理
+
         } catch (Exception e) {
+            System.out.println("Token验证异常: " + e.getMessage());
+            e.printStackTrace();
             writeErrorResponse(response, "401", "Token无效");
             return false;
         }
